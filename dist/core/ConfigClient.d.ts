@@ -63,7 +63,9 @@ export declare class ConfigClient {
      *
      * Si la key no existe, devuelve undefined.
      */
-    get<T = any>(key: string): T;
+    get<T = any>(key: string, option?: {
+        force: boolean;
+    }): T;
     /**
      * Fuerza la recarga completa de la configuración.
      *
