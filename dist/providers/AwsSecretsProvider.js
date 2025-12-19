@@ -20,10 +20,12 @@ class AwsSecretsProvider {
     constructor(params) {
         this.client = new client_secrets_manager_1.SecretsManagerClient({
             region: params.region,
-            credentials: {
-                accessKeyId: params.accessKeyId,
-                secretAccessKey: params.secretAccessKey,
-            },
+            credentials: params.accessKeyId && params.secretAccessKey
+                ? {
+                    accessKeyId: params.accessKeyId,
+                    secretAccessKey: params.secretAccessKey,
+                }
+                : undefined, // usa IAM role si no hay keys
         });
         this.secretNames = params.secretNames;
     }

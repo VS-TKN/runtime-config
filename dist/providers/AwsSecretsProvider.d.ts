@@ -20,10 +20,10 @@ export declare class AwsSecretsProvider implements ConfigProvider {
      */
     private readonly secretNames;
     constructor(params: {
-        accessKeyId: string;
-        secretAccessKey: string;
         region: string;
         secretNames: string[];
+        accessKeyId?: string;
+        secretAccessKey?: string;
     });
     /**
      * Carga los secrets desde AWS y devuelve un objeto con key = nombre del secret

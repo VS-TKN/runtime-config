@@ -24,18 +24,22 @@ export class AwsSecretsProvider implements ConfigProvider {
   private readonly secretNames: string[];
 
   constructor(params: {
-    accessKeyId: string;
-    secretAccessKey: string;
     region: string;
     secretNames: string[];
+    accessKeyId?: string;
+    secretAccessKey?: string;
   }) {
     this.client = new SecretsManagerClient({
       region: params.region,
-      credentials: {
-        accessKeyId: params.accessKeyId,
-        secretAccessKey: params.secretAccessKey,
-      },
+      credentials:
+        params.accessKeyId && params.secretAccessKey
+          ? {
+            accessKeyId: params.accessKeyId,
+            secretAccessKey: params.secretAccessKey,
+          }
+          : undefined, // usa IAM role si no hay keys
     });
+
     this.secretNames = params.secretNames;
   }
 
