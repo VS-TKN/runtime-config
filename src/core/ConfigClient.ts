@@ -41,7 +41,7 @@ export class ConfigClient {
      * Opciones de comportamiento del cliente.
      */
     private readonly options?: RuntimeConfigOptions,
-  ) { }
+  ) {}
 
   /**
    * Inicializa el cliente.
@@ -82,15 +82,13 @@ export class ConfigClient {
    *
    * Si la key no existe, devuelve undefined.
    */
-  get<T = any>(key: string, option?: { force: boolean }): T {
+  get<T = any>(key: string): T {
     if (!this.initialized) {
       throw new Error(
         'ConfigClient not initialized. Call init() before using get().',
       );
     }
-    if (option && option.force) {
-      this.reload()
-    }
+
     return this.cache[key];
   }
 
