@@ -65,7 +65,7 @@ export declare class ConfigClient {
      */
     get<T = any>(key: string, option?: {
         force: boolean;
-    }): T;
+    }): Promise<T>;
     /**
      * Fuerza la recarga completa de la configuración.
      *

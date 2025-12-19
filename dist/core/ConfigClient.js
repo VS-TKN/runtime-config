@@ -71,12 +71,12 @@ class ConfigClient {
      *
      * Si la key no existe, devuelve undefined.
      */
-    get(key, option) {
+    async get(key, option) {
         if (!this.initialized) {
             throw new Error('ConfigClient not initialized. Call init() before using get().');
         }
-        if (option && option.force) {
-            this.reload();
+        if (option?.force) {
+            await this.reload();
         }
         return this.cache[key];
     }
