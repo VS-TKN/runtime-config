@@ -17,6 +17,6 @@ export type {
 } from './core/ConfigTypes';
 
 // Providers
-export { AwsAppConfigProvider } from './providers/AwsAppConfigProvider';
+export { AwsSecretsProvider } from './providers/AwsSecretsProvider';
 export { InMemoryProvider } from './providers/InMemoryProvider';
 export type { ConfigProvider } from './providers/ConfigProvider';

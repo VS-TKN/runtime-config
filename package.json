@@ -1,29 +1,41 @@
 {
-   "author": {
+  "name": "@vs-tkn/runtime-config",
+  "version": "0.1.0",
+  "description": "Runtime configuration library with pluggable providers (AWS AppConfig, in-memory, etc.)",
+  "author": {
     "name": "Daniel Guimar",
     "email": "dguimar@volsmart.com",
     "url": "https://volsmart.com"
   },
-  "name": "@vs-tkn/runtime-config",
-  "version": "0.1.0",
-  "private": false,
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  },
-  "description": "Runtime configuration library with pluggable providers (AWS AppConfig, in-memory, etc.)",
+  "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "runtime-config",
+    "config",
+    "aws",
+    "nestjs",
+    "microservices"
+  ],
   "scripts": {
     "clean": "rm -rf dist",
     "build": "tsc",
     "build:clean": "npm run clean && npm run build"
   },
   "dependencies": {
-    "@aws-sdk/client-appconfigdata": "^3.540.0"
+    "@aws-sdk/client-secrets-manager": "^3.956.0"
   },
   "devDependencies": {
-    "typescript": "^5.4.0",
-    "@types/node": "^20.11.0"
+    "@types/node": "^20.11.0",
+    "typescript": "^5.4.0"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
