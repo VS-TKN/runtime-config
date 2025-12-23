@@ -1,33 +1,46 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProcessEnvProvider = void 0;
 /**
  * 🔥DG
- * InMemoryProvider
+ * ProcessEnvProvider
  *
- * Provider SIMPLE en memoria.
+ * Provider que lee directamente desde process.env
+ *
+ * Requisito:
+ * - Las variables ya deben estar en process.env
+ *   (por ejemplo, cargadas con dotenv en el main)
  *
  * Usos típicos:
- * - tests
- * - desarrollo local
- * - fallback controlado
- *
- * NO usar en producción como fuente real de config.
+ * - Desarrollo local (después de dotenv.config())
+ * - Testing con variables mockeadas
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.InMemoryProvider = void 0;
-class InMemoryProvider {
-    /**
-     * Configuración fija en memoria.
-     * Se pasa por constructor.
-     */
-    constructor(data) {
-        this.data = data;
+class ProcessEnvProvider {
+    constructor(params) {
+        this.variableNames = params.variableNames;
     }
     /**
-     * Devuelve SIEMPRE la misma configuración.
-     * No falla, no muta, no hace I/O.
+     * Lee las variables desde process.env
      */
     async load() {
-        return this.data;
+        const result = {};
+        for (const varName of this.variableNames) {
+            const value = process.env[varName];
+            if (value !== undefined) {
+                // Intentar parsear como JSON si es posible
+                try {
+                    result[varName] = JSON.parse(value);
+                }
+                catch {
+                    // Si no es JSON, guardar como string
+                    result[varName] = value;
+                }
+            }
+            else {
+                console.warn(`Variable ${varName} no encontrada en process.env`);
+            }
+        }
+        return result;
     }
 }
-exports.InMemoryProvider = InMemoryProvider;
+exports.ProcessEnvProvider = ProcessEnvProvider;

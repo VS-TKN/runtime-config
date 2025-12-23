@@ -1,27 +1,28 @@
+import { ConfigProvider } from './ConfigProvider';
 /**
  * 🔥DG
- * InMemoryProvider
+ * ProcessEnvProvider
  *
- * Provider SIMPLE en memoria.
+ * Provider que lee directamente desde process.env
+ *
+ * Requisito:
+ * - Las variables ya deben estar en process.env
+ *   (por ejemplo, cargadas con dotenv en el main)
  *
  * Usos típicos:
- * - tests
- * - desarrollo local
- * - fallback controlado
- *
- * NO usar en producción como fuente real de config.
+ * - Desarrollo local (después de dotenv.config())
+ * - Testing con variables mockeadas
  */
-import { ConfigProvider } from './ConfigProvider';
-export declare class InMemoryProvider implements ConfigProvider {
-    private readonly data;
+export declare class ProcessEnvProvider implements ConfigProvider {
     /**
-     * Configuración fija en memoria.
-     * Se pasa por constructor.
+     * Nombres de las variables que queremos obtener
      */
-    constructor(data: Record<string, any>);
+    private readonly variableNames;
+    constructor(params: {
+        variableNames: string[];
+    });
     /**
-     * Devuelve SIEMPRE la misma configuración.
-     * No falla, no muta, no hace I/O.
+     * Lee las variables desde process.env
      */
     load(): Promise<Record<string, any>>;
 }

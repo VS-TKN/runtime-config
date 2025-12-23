@@ -10,7 +10,7 @@
  * importarse directamente.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.InMemoryProvider = exports.AwsSecretsProvider = exports.ConfigClient = void 0;
+exports.ProcessEnvProvider = exports.AwsSecretsProvider = exports.ConfigClient = void 0;
 // Core
 var ConfigClient_1 = require("./core/ConfigClient");
 Object.defineProperty(exports, "ConfigClient", { enumerable: true, get: function () { return ConfigClient_1.ConfigClient; } });
@@ -18,4 +18,4 @@ Object.defineProperty(exports, "ConfigClient", { enumerable: true, get: function
 var AwsSecretsProvider_1 = require("./providers/AwsSecretsProvider");
 Object.defineProperty(exports, "AwsSecretsProvider", { enumerable: true, get: function () { return AwsSecretsProvider_1.AwsSecretsProvider; } });
 var InMemoryProvider_1 = require("./providers/InMemoryProvider");
-Object.defineProperty(exports, "InMemoryProvider", { enumerable: true, get: function () { return InMemoryProvider_1.InMemoryProvider; } });
+Object.defineProperty(exports, "ProcessEnvProvider", { enumerable: true, get: function () { return InMemoryProvider_1.ProcessEnvProvider; } });
