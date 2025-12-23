@@ -11,5 +11,5 @@
 export { ConfigClient } from './core/ConfigClient';
 export type { RuntimeConfigData, RuntimeConfigOptions, } from './core/ConfigTypes';
 export { AwsSecretsProvider } from './providers/AwsSecretsProvider';
-export { ProcessEnvProvider } from './providers/InMemoryProvider';
+export { LocalProvider } from './providers/LocalProvider';
 export type { ConfigProvider } from './providers/ConfigProvider';

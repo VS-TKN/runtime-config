@@ -18,5 +18,5 @@ export type {
 
 // Providers
 export { AwsSecretsProvider } from './providers/AwsSecretsProvider';
-export { ProcessEnvProvider } from './providers/InMemoryProvider';
+export { LocalProvider } from './providers/LocalProvider';
 export type { ConfigProvider } from './providers/ConfigProvider';

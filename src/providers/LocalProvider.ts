@@ -14,7 +14,7 @@ import { ConfigProvider } from './ConfigProvider';
  * - Desarrollo local (después de dotenv.config())
  * - Testing con variables mockeadas
  */
-export class ProcessEnvProvider implements ConfigProvider {
+export class LocalProvider implements ConfigProvider {
   /**
    * Nombres de las variables que queremos obtener
    */
