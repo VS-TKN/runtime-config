@@ -3,10 +3,12 @@ import { ConfigProvider } from './ConfigProvider';
  * 🔥DG
  * AwsSecretsProvider
  *
- * Provider para leer secrets específicos desde AWS SecretsManager.
+ * Provider que obtiene variables de entorno desde una Task Definition de ECS.
+ * Automáticamente resuelve secrets si la variable los tiene configurados.
  *
  * Responsabilidad ÚNICA:
- * - Obtener secretos desde AWS SecretsManager
+ * - Leer variables de una Task Definition
+ * - Resolver secrets cuando sea necesario
  *
  * NO hace:
  * - cache (eso lo hace ConfigClient)
@@ -14,19 +16,36 @@ import { ConfigProvider } from './ConfigProvider';
  * - validación
  */
 export declare class AwsSecretsProvider implements ConfigProvider {
-    private client;
+    private secretsClient;
+    private ecsClient;
     /**
-     * Lista de secrets a cachear
+     * Nombres de las variables que queremos obtener
      */
-    private readonly secretNames;
+    private readonly variableNames;
+    /**
+     * ARN o nombre de la Task Definition (ej: "mi-app:5" o "mi-app")
+     */
+    private readonly taskDefinition;
+    /**
+     * Nombre del contenedor dentro de la task definition (opcional si solo hay uno)
+     */
+    private readonly containerName?;
     constructor(params: {
         region: string;
-        secretNames: string[];
+        taskDefinition: string;
+        variableNames: string[];
+        containerName?: string;
         accessKeyId?: string;
         secretAccessKey?: string;
     });
     /**
-     * Carga los secrets desde AWS y devuelve un objeto con key = nombre del secret
+     * 1. Consulta la Task Definition en ECS
+     * 2. Extrae las variables solicitadas
+     * 3. Resuelve secrets si es necesario
      */
     load(): Promise<Record<string, any>>;
+    /**
+     * Resuelve un secret desde AWS SecretsManager
+     */
+    private resolveSecret;
 }
