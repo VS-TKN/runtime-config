@@ -60,9 +60,9 @@ export class AwsSecretsProvider implements ConfigProvider {
     const credentials =
       params.accessKeyId && params.secretAccessKey
         ? {
-            accessKeyId: params.accessKeyId,
-            secretAccessKey: params.secretAccessKey,
-          }
+          accessKeyId: params.accessKeyId,
+          secretAccessKey: params.secretAccessKey,
+        }
         : undefined;
 
     this.secretsClient = new SecretsManagerClient({
@@ -170,9 +170,12 @@ export class AwsSecretsProvider implements ConfigProvider {
       );
     }
 
+
     const res = await fetch(`${uri}/task`);
     const data = await res.json();
-
+    console.debug(
+      `[AwsSecretsProvider] Using task definition: ${data.TaskDefinitionFamily}`
+    );
     return data.TaskDefinitionFamily;
   }
 
