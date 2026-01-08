@@ -1,5 +1,6 @@
 import { ConfigProvider } from './ConfigProvider';
 /**
+ * 🔥DG
  * AwsSecretsProvider
  *
  * Provider de configuración para aplicaciones que corren en ECS.

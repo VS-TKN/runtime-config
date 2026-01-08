@@ -4,6 +4,7 @@ exports.AwsSecretsProvider = void 0;
 const client_secrets_manager_1 = require("@aws-sdk/client-secrets-manager");
 const client_ecs_1 = require("@aws-sdk/client-ecs");
 /**
+ * 🔥DG
  * AwsSecretsProvider
  *
  * Provider de configuración para aplicaciones que corren en ECS.
@@ -119,6 +120,9 @@ class AwsSecretsProvider {
         }
         const res = await fetch(`${uri}/task`);
         const data = await res.json();
+        console.debug(
+            `[AwsSecretsProvider] Using task definition: ${data.TaskDefinitionFamily}`
+        );
         return data.TaskDefinitionFamily;
     }
     /**
