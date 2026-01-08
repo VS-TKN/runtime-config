@@ -120,8 +120,8 @@ class AwsSecretsProvider {
         }
         const res = await fetch(`${uri}/task`);
         const data = await res.json();
-        console.debug(`[AwsSecretsProvider] Using task definition: ${data.TaskDefinitionFamily}`);
-        return data.TaskDefinitionFamily;
+        console.debug(`[AwsSecretsProvider] Using task definition from: ${data}`);
+        return data.TaskDefinitionArn;
     }
     /**
      * Obtiene el valor de un secret desde AWS Secrets Manager.

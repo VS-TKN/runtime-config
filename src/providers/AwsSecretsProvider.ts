@@ -174,9 +174,9 @@ export class AwsSecretsProvider implements ConfigProvider {
     const res = await fetch(`${uri}/task`);
     const data = await res.json();
     console.debug(
-      `[AwsSecretsProvider] Using task definition: ${data.TaskDefinitionFamily}`
+      `[AwsSecretsProvider] Using task definition from: ${data}`
     );
-    return data.TaskDefinitionFamily;
+    return data.TaskDefinitionArn;
   }
 
   /**
