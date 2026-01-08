@@ -118,10 +118,20 @@ class AwsSecretsProvider {
         if (!uri) {
             throw new Error('taskDefinition no especificada y ECS metadata no disponible');
         }
+        console.log('[AwsSecretsProvider] Fetching metadata from:', uri);
         const res = await fetch(`${uri}/task`);
         const data = await res.json();
-        console.debug(`[AwsSecretsProvider] Using task definition from: ${data}`);
-        return data.TaskDefinitionArn;
+        console.log('[AwsSecretsProvider] ECS task metadata:', JSON.stringify(data, null, 2));
+        console.log('[AwsSecretsProvider] Available keys:', Object.keys(data));
+        // Intentar diferentes campos
+        const taskDefArn = data.TaskDefinitionArn || data.taskDefinitionArn || data.TaskArn;
+        const family = data.Family || data.family;
+        console.log('[AwsSecretsProvider] TaskDefinitionArn:', taskDefArn);
+        console.log('[AwsSecretsProvider] Family:', family);
+        if (!taskDefArn && !family) {
+            throw new Error('No se pudo obtener Task Definition de metadata ECS: ' + JSON.stringify(data));
+        }
+        return taskDefArn || family;
     }
     /**
      * Obtiene el valor de un secret desde AWS Secrets Manager.
