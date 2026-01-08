@@ -4,22 +4,30 @@ exports.AwsSecretsProvider = void 0;
 const client_secrets_manager_1 = require("@aws-sdk/client-secrets-manager");
 const client_ecs_1 = require("@aws-sdk/client-ecs");
 /**
- * 🔥DG
  * AwsSecretsProvider
  *
- * Provider que obtiene variables de entorno desde una Task Definition de ECS.
- * Automáticamente resuelve secrets si la variable los tiene configurados.
+ * Provider de configuración para aplicaciones que corren en ECS.
  *
- * Responsabilidad ÚNICA:
- * - Leer variables de una Task Definition
- * - Resolver secrets cuando sea necesario
+ * Responsabilidad:
+ * - Obtener variables de configuración definidas en una Task Definition
+ * - Resolver valores desde AWS Secrets Manager cuando corresponde
  *
- * NO hace:
- * - cache (eso lo hace ConfigClient)
- * - polling
- * - validación
+ * El provider:
+ * - Detecta automáticamente la Task Definition cuando corre en ECS
+ * - Soporta múltiples contenedores (requiere containerName)
+ * - No maneja cache ni refresh (responsabilidad del ConfigClient)
  */
 class AwsSecretsProvider {
+    /**
+     * Constructor del provider
+     *
+     * @param params.region Región AWS donde corre ECS / Secrets Manager
+     * @param params.taskDefinition Nombre o ARN de la Task Definition (opcional)
+     * @param params.variableNames Lista de variables que se desean obtener
+     * @param params.containerName Nombre del contenedor objetivo
+     * @param params.accessKeyId Credenciales explícitas (opcional)
+     * @param params.secretAccessKey Credenciales explícitas (opcional)
+     */
     constructor(params) {
         const credentials = params.accessKeyId && params.secretAccessKey
             ? {
@@ -40,48 +48,48 @@ class AwsSecretsProvider {
         this.containerName = params.containerName;
     }
     /**
-     * 1. Consulta la Task Definition en ECS
-     * 2. Extrae las variables solicitadas
-     * 3. Resuelve secrets si es necesario
+     * Carga la configuración desde ECS.
+     *
+     * Flujo:
+     * 1. Resuelve la Task Definition (parámetro o metadata de ECS)
+     * 2. Obtiene la definición completa desde ECS
+     * 3. Selecciona el contenedor configurado
+     * 4. Extrae variables de entorno y secrets solicitados
+     *
+     * @returns Objeto con las variables resueltas
+     * @throws Error si no se puede acceder a ECS o al contenedor
      */
     async load() {
         const result = {};
         try {
-            // 1. Obtener la Task Definition
+            // Resolver dinámicamente la Task Definition
+            const taskDefinition = await this.resolveTaskDefinition();
+            // Consultar la Task Definition en ECS
             const command = new client_ecs_1.DescribeTaskDefinitionCommand({
-                taskDefinition: this.taskDefinition,
+                taskDefinition,
             });
             const response = await this.ecsClient.send(command);
             if (!response.taskDefinition?.containerDefinitions) {
                 throw new Error('No se encontraron definiciones de contenedores');
             }
-            // 2. Obtener el contenedor correcto
-            const container = this.containerName
-                ? response.taskDefinition.containerDefinitions.find((c) => c.name === this.containerName)
-                : response.taskDefinition.containerDefinitions[0];
+            // Buscar el contenedor objetivo
+            const container = response.taskDefinition.containerDefinitions.find((c) => c.name === this.containerName);
             if (!container) {
-                throw new Error(`No se encontró el contenedor ${this.containerName || '(primero)'}`);
+                throw new Error(`No se encontró el contenedor ${this.containerName}`);
             }
-            // 3. Procesar cada variable solicitada
+            // Resolver cada variable solicitada
             for (const varName of this.variableNames) {
-                try {
-                    // Buscar en 'environment' (valores directos)
-                    const envVar = container.environment?.find((e) => e.name === varName);
-                    if (envVar?.value !== undefined) {
-                        result[varName] = envVar.value;
-                        continue;
-                    }
-                    // Buscar en 'secrets' (secrets de AWS)
-                    const secretVar = container.secrets?.find((s) => s.name === varName);
-                    if (secretVar?.valueFrom) {
-                        const secretValue = await this.resolveSecret(secretVar.valueFrom);
-                        result[varName] = secretValue;
-                        continue;
-                    }
-                    console.warn(`Variable ${varName} no encontrada en la task definition`);
+                // 1. Variables definidas directamente en environment
+                const envVar = container.environment?.find((e) => e.name === varName);
+                if (envVar?.value !== undefined) {
+                    result[varName] = envVar.value;
+                    continue;
                 }
-                catch (err) {
-                    console.warn(`Error procesando variable ${varName}:`, err);
+                // 2. Variables definidas como secrets
+                const secretVar = container.secrets?.find((s) => s.name === varName);
+                if (secretVar?.valueFrom) {
+                    result[varName] = await this.resolveSecret(secretVar.valueFrom);
+                    continue;
                 }
             }
         }
@@ -92,7 +100,35 @@ class AwsSecretsProvider {
         return result;
     }
     /**
-     * Resuelve un secret desde AWS SecretsManager
+     * Resuelve el nombre de la Task Definition a utilizar.
+     *
+     * Prioridad:
+     * 1. Task Definition pasada por parámetro al constructor
+     * 2. Metadata de ECS (ECS_CONTAINER_METADATA_URI_V4)
+     *
+     * @returns Nombre de la Task Definition (family)
+     * @throws Error si no puede resolverse
+     */
+    async resolveTaskDefinition() {
+        if (this.taskDefinition) {
+            return this.taskDefinition;
+        }
+        const uri = process.env.ECS_CONTAINER_METADATA_URI_V4;
+        if (!uri) {
+            throw new Error('taskDefinition no especificada y ECS metadata no disponible');
+        }
+        const res = await fetch(`${uri}/task`);
+        const data = await res.json();
+        return data.TaskDefinitionFamily;
+    }
+    /**
+     * Obtiene el valor de un secret desde AWS Secrets Manager.
+     *
+     * Si el secret contiene un JSON, se parsea automáticamente.
+     *
+     * @param secretId ARN o nombre del secret
+     * @returns Valor del secret (string o JSON)
+     * @throws Error si el secret no existe o no tiene SecretString
      */
     async resolveSecret(secretId) {
         const command = new client_secrets_manager_1.GetSecretValueCommand({ SecretId: secretId });
