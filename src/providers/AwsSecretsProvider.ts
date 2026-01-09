@@ -158,36 +158,29 @@ export class AwsSecretsProvider implements ConfigProvider {
    * @returns Nombre de la Task Definition (family)
    * @throws Error si no puede resolverse
    */
-  private async resolveTaskDefinition() {
+  private async resolveTaskDefinition(): Promise<string> {
     if (this.taskDefinition) {
       return this.taskDefinition;
     }
 
     const uri = process.env.ECS_CONTAINER_METADATA_URI_V4;
     if (!uri) {
-      throw new Error('taskDefinition no especificada y ECS metadata no disponible');
+      throw new Error(
+        'taskDefinition no especificada y ECS metadata no disponible'
+      );
     }
-
-    console.log('[AwsSecretsProvider] Fetching metadata from:', uri);
 
     const res = await fetch(`${uri}/task`);
     const data = await res.json();
 
-    console.log('[AwsSecretsProvider] ECS task metadata:', JSON.stringify(data, null, 2));
-    console.log('[AwsSecretsProvider] Available keys:', Object.keys(data));
+    // ✅ Incluir la revisión para obtener la versión exacta que está corriendo
+    const taskDefinition = `${data.Family}:${data.Revision}`;
 
-    // Intentar diferentes campos
-    const taskDefArn = data.TaskDefinitionArn || data.taskDefinitionArn || data.TaskArn;
-    const family = data.Family || data.family;
+    console.log(
+      `[AwsSecretsProvider] Using task definition: ${taskDefinition}`
+    );
 
-    console.log('[AwsSecretsProvider] TaskDefinitionArn:', taskDefArn);
-    console.log('[AwsSecretsProvider] Family:', family);
-
-    if (!taskDefArn && !family) {
-      throw new Error('No se pudo obtener Task Definition de metadata ECS: ' + JSON.stringify(data));
-    }
-
-    return taskDefArn || family;
+    return taskDefinition; // Retorna "backend-task:166" en lugar de solo "backend-task"
   }
 
   /**
